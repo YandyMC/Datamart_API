@@ -1,0 +1,236 @@
+---
+import { Image } from "astro:assets"
+import Layout from "../layouts/Layout.astro"
+import ErrorAlert from "../components/Alert.astro"
+
+import cancelIcon from "../icons/cancel.svg"
+import closedEyeIcon from "../icons/eye-closed.svg"
+import homeIcon from "../icons/home.svg"
+import keyIcon from "../icons/key.svg"
+---
+
+<Layout title="Generar contraseña">
+	<main class="flex w-full justify-center pt-12">
+		<form id="form" class="min-w-[85%] md:min-w-[400px]">
+			<a href="/" class="link mb-8 flex items-center text-lg">
+				<picture>
+					<Image src={homeIcon} alt="LOGO" class="me-1 h-4 w-4" />
+				</picture>
+				Ir al inicio
+			</a>
+			<div class="rounded-lg bg-white p-6 shadow-lg">
+				<div class="label">
+					<span class="label-text text-black">Digite la contraseña</span>
+				</div>
+				<div class="join w-full">
+					<div
+						class:list=`
+							input join-item bg-white border-gray-400 flex w-full items-center gap-2
+							text-gray-500
+							hover:bg-gray-100 hover:border-gray-400
+							focus:bg-gray-100 focus:border-gray-400
+							focus-within:bg-gray-100 focus-within:border-gray-400
+						`
+					>
+						<picture>
+							<Image src={keyIcon} alt="key icon" />
+						</picture>
+						<input id="password" type="password" placeholder="••••••••" required />
+					</div>
+					<button
+						type="button"
+						id="show-pass-btn"
+						class:list=`
+							btn btn-natural btn-outline join-item border-gray-400
+							hover:bg-gray-300 hover:border-gray-500
+						`
+					>
+						<picture class="w-5">
+							<Image id="show-pass-icon" src={closedEyeIcon} alt="Eye icon" />
+						</picture>
+					</button>
+				</div>
+				<progress class="progress w-full" value="0" max="100"></progress>
+				<div class="label flex flex-col items-start gap-2">
+					<span class="label-text text-black">
+						La contraseña debería cumplir los siguientes requerimientos:
+					</span>
+					<span class="label-text flex flex-wrap items-center text-gray-600">
+						<picture id="length-icon" class="me-2 w-4">
+							<Image src={cancelIcon} alt="Length icon" />
+						</picture>
+						Como mínimo &nbsp;<strong>8 caracteres</strong>
+					</span>
+					<span class="label-text flex flex-wrap items-center text-gray-600">
+						<picture id="mayus-icon" class="me-2 w-4">
+							<Image src={cancelIcon} alt="Mayus icon" />
+						</picture>
+						Contener &nbsp;<strong>una letra mayúscula</strong>
+					</span>
+					<span class="label-text flex flex-wrap items-center text-gray-600">
+						<picture id="minus-icon" class="me-2 w-4">
+							<Image src={cancelIcon} alt="Minus icon" />
+						</picture>
+						Contener &nbsp;<strong>una letra minúscula</strong>
+					</span>
+					<span class="label-text flex flex-wrap items-center text-gray-600">
+						<picture id="number-icon" class="me-2 w-4">
+							<Image src={cancelIcon} alt="Number icon" />
+						</picture>
+						Contener &nbsp;<strong>un número</strong>
+					</span>
+					<span class="label-text flex flex-wrap items-center text-gray-600">
+						<picture id="char-icon" class="me-2 w-4">
+							<Image src={cancelIcon} alt="Char icon" />
+						</picture>
+						Contener &nbsp;<strong>un carácter especial</strong>
+					</span>
+				</div>
+				<button
+					class:list=`
+						btn text-orange-800 bg-orange-200 border-orange-300 w-full mt-4 mb-3
+						hover:bg-orange-300 hover:border-orange-500 hover:text-orange-900
+					`
+				>
+					Generar contraseña
+				</button>
+				<a
+					href="/iniciar-sesion"
+					class:list=`
+						btn btn-sm btn-outline btn-neutral min-h-[2.25rem] w-full
+						text-sky-800 bg-sky-200 border-sky-300 mb-5
+						hover:bg-sky-300 hover:border-sky-500 hover:text-sky-900
+					`
+				>
+					Iniciar sessión
+				</a>
+			</div>
+			<div class="mb-7">
+				<ErrorAlert alertId="alert" alertType="success">
+					Contraseña copiada al portapapeles
+				</ErrorAlert>
+			</div>
+		</form>
+	</main>
+</Layout>
+
+<script is:inline>
+	const checkIcon =
+		'<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" stroke-width="0" fill="#36AE7C" /></svg>'
+
+	const cancelIcon =
+		'<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"/> <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-6.489 5.8a1 1 0 0 0 -1.218 1.567l1.292 1.293l-1.292 1.293l-.083 .094a1 1 0 0 0 1.497 1.32l1.293 -1.292l1.293 1.292l.094 .083a1 1 0 0 0 1.32 -1.497l-1.292 -1.293l1.292 -1.293l.083 -.094a1 1 0 0 0 -1.497 -1.32l-1.293 1.292l-1.293 -1.292l-.094 -.083z" stroke-width="0" fill="#FF6969" /></svg>'
+
+	const eyeIcon =
+		'<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#4B5563" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"/> <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /> <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /> </svg>'
+
+	const closeEyedIcon =
+		'<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#4B5563" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"/> <path d="M21 9c-2.4 2.667 -5.4 4 -9 4c-3.6 0 -6.6 -1.333 -9 -4" /> <path d="M3 15l2.5 -3.8" /> <path d="M21 14.976l-2.492 -3.776" /> <path d="M9 17l.5 -4" /> <path d="M15 17l-.5 -4" /> </svg>'
+
+	const showPassBtn = document.querySelector("#show-pass-btn")
+	const passwordInput = document.querySelector("#password")
+
+	showPassBtn.addEventListener("click", () => {
+		if (passwordInput.type === "password") {
+			passwordInput.type = "text"
+			showPassBtn.innerHTML = eyeIcon
+		} else {
+			passwordInput.type = "password"
+			showPassBtn.innerHTML = closeEyedIcon
+		}
+	})
+
+	const progress = document.querySelector("progress")
+	const lengthIcon = document.querySelector("#length-icon")
+	const mayusIcon = document.querySelector("#mayus-icon")
+	const minusIcon = document.querySelector("#minus-icon")
+	const numberIcon = document.querySelector("#number-icon")
+	const charIcon = document.querySelector("#char-icon")
+
+	passwordInput.addEventListener("keyup", () => {
+		const password = passwordInput.value
+
+		if (password.length >= 8) {
+			lengthIcon.innerHTML = checkIcon
+			progress.value = 20
+		} else {
+			lengthIcon.innerHTML = cancelIcon
+			progress.value = 0
+		}
+
+		if (password.match(/[A-Z]/)) {
+			mayusIcon.innerHTML = checkIcon
+			progress.value += 20
+		} else {
+			mayusIcon.innerHTML = cancelIcon
+		}
+
+		if (password.match(/[a-z]/)) {
+			minusIcon.innerHTML = checkIcon
+			progress.value += 20
+		} else {
+			minusIcon.innerHTML = cancelIcon
+		}
+
+		if (password.match(/[0-9]/)) {
+			numberIcon.innerHTML = checkIcon
+			progress.value += 20
+		} else {
+			numberIcon.innerHTML = cancelIcon
+		}
+
+		if (password.match(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/)) {
+			charIcon.innerHTML = checkIcon
+			progress.value += 20
+		} else {
+			charIcon.innerHTML = cancelIcon
+		}
+
+		if (progress.value === 100) {
+			progress.classList.remove("progress-error")
+			progress.classList.add("progress-success")
+		} else {
+			progress.classList.remove("progress-success")
+			progress.classList.add("progress-error")
+		}
+	})
+
+	const form = document.querySelector("#form")
+	const alert = document.querySelector("#alert")
+
+	form.addEventListener("submit", (event) => {
+		event.preventDefault()
+
+		// Comprobar si el campo de contraseña está vacío
+		if (passwordInput.value.trim() === "") {
+			// Eliminar los espacios en blanco
+			passwordInput.value = ""
+			return
+		}
+
+		const rawPassword = passwordInput.value
+		const URI = "http://localhost:4321/api/users/pwd/encrypt.json"
+
+		const formData = new FormData()
+		formData.append("rawPassword", rawPassword)
+		alert.classList.add("hidden")
+
+		fetch(URI, {
+			method: "POST",
+			body: formData,
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				const { secPassword } = data
+
+				// Copy secure password to clipboard
+				navigator.clipboard.writeText(secPassword)
+				alert.classList.remove("hidden")
+			})
+	})
+
+	// Alert hidden when delete key is pressed
+	passwordInput.addEventListener("keydown", () => {
+		alert.classList.add("hidden")
+	})
+</script>

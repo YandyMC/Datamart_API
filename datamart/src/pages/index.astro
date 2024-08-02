@@ -1,0 +1,101 @@
+---
+import Header from "../components/Header.astro"
+import Layout from "../layouts/Layout.astro"
+
+const REPORT_TYPE = import.meta.env.REPORT_TYPE
+const WEB_CLIENT_ID = import.meta.env.WEB_CLIENT_ID
+const BASE_EMBED_URL = import.meta.env.BASE_EMBED_URL
+const EMBED_URL = `${BASE_EMBED_URL}?reportId=${WEB_CLIENT_ID}`
+
+// @ts-expect-error
+// Obtener la sesión del usuario
+let sessionData = Astro.locals.session?.data
+if (!sessionData) sessionData = { username: null }
+---
+
+<Layout title="Reportes">
+	<main class="min-h-dvh">
+		<Header />
+		<div id="loader" class="loader-h-full flex flex-col items-center justify-center">
+			<span class="loading loading-spinner loading-lg"></span>
+			<span class="mt-5">Cargando Gráfico</span>
+		</div>
+		<div id="embedContainer" class="powerbi-h-full hidden"></div>
+		<!-- <iframe
+			title="xxxx"
+			width="1140"
+			height="00.00"
+			frameborder="0"
+			allowFullScreen="true"
+			src="https://app.powerbi.com/reportEmbed?reportId=xxxxx">
+		</iframe> -->
+	</main>
+</Layout>
+
+<script is:inline define:vars={{ REPORT_TYPE, WEB_CLIENT_ID, EMBED_URL, sessionData }}>
+	if (!sessionData.username) window.location.href = "/iniciar-sesion"
+
+	let newToken = null
+
+	const loader = document.getElementById("loader")
+	const embedContainer = document.getElementById("embedContainer")
+
+	function convertToUnixTime(date) {
+		return Math.floor(date.getTime() / 1000)
+	}
+
+	const dateNow = new Date()
+	const currentDate = convertToUnixTime(dateNow)
+	const expiresOn = sessionData.expires_on || currentDate
+	// console.log("session", sessionData)
+
+	async function main() {
+		if (!sessionData.token || currentDate > expiresOn) {
+			const tokenEndpoint = "/api/token/get.json"
+			const response = await fetch(tokenEndpoint)
+			const data = await response.json()
+			newToken = data.token
+		}
+
+		const embedConfig = {
+			type: REPORT_TYPE,
+			id: WEB_CLIENT_ID,
+			embedUrl: EMBED_URL,
+			accessToken: sessionData.token || newToken,
+			settings: {
+				panes: {
+					filters: {
+						visible: false,
+					},
+					pageNavigation: {
+						visible: false,
+					},
+				},
+				bars: {
+					statusBar: {
+						visible: true,
+					},
+				},
+			},
+		}
+
+		// Incrustar el reporte en el contenedor especificado
+		const report = powerbi.embed(embedContainer, embedConfig)
+
+		embedContainer.classList.remove("hidden")
+		loader.classList.add("hidden")
+		loader.remove()
+	}
+
+	main()
+</script>
+
+<style>
+	.loader-h-full {
+		height: calc(100vh - 190px);
+	}
+
+	.powerbi-h-full {
+		height: calc(100vh - 64px) !important;
+	}
+</style>

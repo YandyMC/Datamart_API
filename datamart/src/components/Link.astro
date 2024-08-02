@@ -1,0 +1,36 @@
+---
+import { Image } from "astro:assets"
+
+interface Props {
+	href: string
+	linkId: string
+	isActive?: boolean
+	isOutline?: boolean
+	image?: ImageMetadata
+	type?: "neutral" | "primary" | "secondary" | "accent" | "ghost" | "link"
+}
+
+const { href, linkId, isActive = false, isOutline = false, image, type } = Astro.props
+
+let className = "btn btn-sm flex justify-start mx-[2px]"
+if (isActive) className += " btn-active"
+if (isOutline) className += " btn-outline"
+
+if (type === "neutral") className += " btn-neutral"
+if (type === "primary") className += " btn-primary"
+if (type === "secondary") className += " btn-secondary"
+if (type === "accent") className += " btn-accent"
+if (type === "ghost") className += " btn-ghost"
+if (type === "link") className += " btn-link"
+---
+
+<a id={linkId} href={href} class:list={className}>
+	{
+		image && (
+			<picture>
+				<Image src={image} class="h-6 w-6" alt="Icon" />
+			</picture>
+		)
+	}
+	<slot />
+</a>

@@ -1,0 +1,7 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "tsconfig.json": "tsconfig.*.json",
+    "package.json": "package-lock.json,astro.config.mjs,tailwind.config.mjs,postcss.config.mjs,.prettierrc.mjs,.prettierignore,.eslintrc.cjs,.editorconfig"
+  }
+}

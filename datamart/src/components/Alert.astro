@@ -1,0 +1,42 @@
+---
+import { Image } from "astro:assets"
+
+import errorIcon from "../icons/alerts/error.svg"
+import infoIcon from "../icons/alerts/info.svg"
+import successIcon from "../icons/alerts/success.svg"
+import warningIcon from "../icons/alerts/warning.svg"
+
+interface Props {
+	alertId: string
+	alertType: "error" | "info" | "success" | "warning"
+}
+
+const { alertId, alertType } = Astro.props
+
+let srcIcon = errorIcon
+if (alertType === "info") srcIcon = infoIcon
+if (alertType === "success") srcIcon = successIcon
+if (alertType === "warning") srcIcon = warningIcon
+
+let className = "alert hidden mt-3 rounded-md p-3"
+if (alertType === "error") className += " alert-error"
+if (alertType === "info") className += " bg-blue-400 border-blue-400"
+if (alertType === "success") className += " alert-success"
+if (alertType === "warning") className += " alert-warning"
+
+let textClassName = "text-sm font-semibold"
+if (alertType === "error") textClassName += " text-red-900"
+if (alertType === "info") textClassName += " text-blue-900"
+if (alertType === "success") textClassName += " text-green-100"
+if (alertType === "warning") textClassName += " text-yellow-100"
+---
+
+<div role="alert" id={alertId} class:list={className}>
+	<picture class="">
+		<Image src={srcIcon} alt=`${alertType} icon` class="h-4 w-4" />
+	</picture>
+	<span class:list={textClassName}>
+		<!-- Message -->
+		<slot />
+	</span>
+</div>

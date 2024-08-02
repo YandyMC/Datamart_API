@@ -1,0 +1,150 @@
+---
+import { Image } from "astro:assets"
+import ErrorAlert from "../components/Alert.astro"
+import Layout from "../layouts/Layout.astro"
+
+import homeIcon from "../icons/home.svg"
+---
+
+<Layout title="Login">
+	<div class="flex min-h-dvh flex-col items-center justify-center">
+		<a href="/" class="link mb-7 flex items-center text-lg">
+			<picture>
+				<Image src={homeIcon} alt="LOGO" class="me-1 h-4 w-4" />
+			</picture>
+			Ir al inicio
+		</a>
+		<form
+			id="formLogin"
+			class="min-w-80 rounded-lg border border-gray-200 border-opacity-15 bg-white p-6 shadow-lg md:min-w-[350px]"
+		>
+			<div class="form-control mb-3">
+				<label class="label">
+					<span class="label-text text-black">Usuario</span>
+				</label>
+				<input
+					type="text"
+					id="username"
+					name="username"
+					class:list=`
+						input input-bordered border-gray-300 text-gray-500 bg-gray-200
+						hover:border-gray-400 focus:border-gray-400
+						focus-within:border-gray-400
+					`
+					required
+				/>
+			</div>
+			<div class="form-control">
+				<label class="label">
+					<span class="label-text text-black">Contraseña</span>
+				</label>
+				<input
+					id="password"
+					type="password"
+					name="password"
+					class:list=`
+						input border-gray-300 text-gray-500 bg-gray-200
+						hover:border-gray-400 focus:border-gray-400
+						focus-within:border-gray-400
+					`
+					required
+				/>
+			</div>
+			<div class="form-control mt-6">
+				<button
+					type="submit"
+					id="btn-login"
+					class:list=`
+						btn text-orange-800 bg-orange-200 border-orange-300
+						hover:bg-orange-300 hover:border-orange-500 hover:text-orange-900
+					`
+				>
+					<span id="loading" class="loading loading-spinner loading-xs hidden"></span>
+					<span id="login-text">Iniciar sesión</span>
+				</button>
+			</div>
+			<a
+				href="/generar-contraseña"
+				class:list=`
+					btn btn-sm btn-outline btn-neutral
+					my-5 min-h-[2.25rem] w-full
+					text-sky-800 bg-sky-200 border-sky-300
+					hover:bg-sky-300 hover:border-sky-500 hover:text-sky-900
+				`
+			>
+				Generar contraseña
+			</a>
+		</form>
+		<div class="w-[350px]">
+			<ErrorAlert alertId="data-error-alert" alertType="error">
+				Usuario o contraseña incorrectos
+			</ErrorAlert>
+			<ErrorAlert alertId="user-error-alert" alertType="error">Usuario no registrado</ErrorAlert>
+			<ErrorAlert alertId="warning-alert" alertType="warning">Usuario deshabilitado</ErrorAlert>
+		</div>
+	</div>
+</Layout>
+
+<script is:inline>
+	const formLogin = document.querySelector("#formLogin")
+	const btnLogin = document.querySelector("#btn-login")
+	const loading = document.querySelector("#loading")
+	// const username = document.querySelector("#username")
+	// const password = document.querySelector("#password")
+	const loginText = document.querySelector("#login-text")
+	const userErrorAlert = document.querySelector("#user-error-alert")
+	const dataErrorAlert = document.querySelector("#data-error-alert")
+	const warningAlert = document.querySelector("#warning-alert")
+
+	formLogin.addEventListener("submit", async (event) => {
+		event.preventDefault()
+
+		btnLogin.classList.add("is-disabled")
+		loading.classList.remove("hidden")
+		loginText.classList.add("hidden")
+
+		const formData = new FormData(formLogin)
+		const loginEndpoint = "/api/users/login.json"
+
+		const response = await fetch(loginEndpoint, {
+			method: "POST",
+			body: formData,
+		})
+
+		const data = await response.json()
+
+		if (response.status === 400) {
+			const { error } = data
+			hideAllAlerts()
+
+			loading.classList.add("hidden")
+			loginText.classList.remove("hidden")
+			btnLogin.classList.remove("is-disabled")
+
+			if (error === "Usuario no encontrado") userErrorAlert.classList.remove("hidden")
+			if (error === "Datos incorrectos") dataErrorAlert.classList.remove("hidden")
+			if (error === "Usuario inactivo") warningAlert.classList.remove("hidden")
+		}
+
+		const { message } = data
+		if (message === "success") window.location.href = "/"
+	})
+
+	function hideAllAlerts() {
+		userErrorAlert.classList.add("hidden")
+		dataErrorAlert.classList.add("hidden")
+		warningAlert.classList.add("hidden")
+	}
+
+	// username.addEventListener("input", hideAllAlerts)
+	// password.addEventListener("input", hideAllAlerts)
+</script>
+
+<style>
+	.is-disabled {
+		background-color: #ccc;
+		pointer-events: none;
+		border: #ccc;
+		opacity: 0.75;
+	}
+</style>

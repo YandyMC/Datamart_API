@@ -1,0 +1,181 @@
+---
+import { Image } from "astro:assets"
+import Link from "../components/Link.astro"
+
+import chartIcon from "../icons/chart.svg"
+import logOutIcon from "../icons/logout.svg"
+import menuIcon from "../icons/menu.svg"
+import tableIcon from "../icons/table.svg"
+import userIcon from "../icons/user.svg"
+import cylinderIcon from "../icons/cylinder.svg"
+
+const { pathname } = Astro.url
+
+const tableLink = "/datos"
+const chartLink = "/"
+
+const tableIsActive = pathname === tableLink
+const chartIsActive = pathname === chartLink
+
+// @ts-expect-error
+// Obtener la sesión del usuario
+let sessionData = Astro.locals.session?.data
+if (!sessionData) sessionData = { username: null }
+---
+
+<Fragment>
+	<div class="navbar bg-base-300">
+		<div class="flex-1">
+			<a href="/" class="btn btn-ghost text-lg hover:bg-base-100">
+				<picture>
+					<Image src={cylinderIcon} class="h-6 w-6" alt="LOGO" />
+				</picture>
+				José Mero Reyes
+			</a>
+		</div>
+		<!-- - - - - - - - - - - - - - - - - - - - - - - - - -->
+		<div id="menu-items" class="dropdown dropdown-end">
+			<div id="menu-icon" tabindex="0" role="button" class="btn btn-circle btn-ghost sm:hidden">
+				<picture>
+					<Image src={menuIcon} class="w-6" alt="Menu Icon" />
+				</picture>
+			</div>
+			<ul
+				tabindex="0"
+				id="menu-dropdown"
+				class="menu dropdown-content menu-sm z-[1] mt-3 flex w-52 flex-col gap-1 rounded-box bg-slate-800 p-2 shadow sm:contents"
+			>
+				{
+					sessionData.username && (
+						<Fragment>
+							<Link
+								type="ghost"
+								href={chartLink}
+								image={chartIcon}
+								linkId="chart-link"
+								isActive={chartIsActive}
+							>
+								Reportes
+							</Link>
+							<Link
+								type="ghost"
+								href={tableLink}
+								image={tableIcon}
+								linkId="table-link"
+								isActive={tableIsActive}
+							>
+								Datos
+							</Link>
+						</Fragment>
+					)
+				}
+				<!-- {
+					!sessionData.username && (
+						<Fragment>
+							<Link href="/iniciar-sesion" linkId="login-link" type="secondary">
+								Iniciar Sesión
+							</Link>
+							<Link
+								href="/generar-contraseña"
+								linkId="register-link"
+								type="primary"
+								isOutline={true}
+							>
+								Registrar Cuenta
+							</Link>
+						</Fragment>
+					)
+				} -->
+				<!-- - - - - - - - - - - - - - - - - - - - - - - - - -->
+				<div class="flex gap-1">
+					<div id="logout-dropdown" class="dropdown dropdown-end w-full">
+						{
+							sessionData.username && (
+								<Fragment>
+									<div
+										tabindex="0"
+										role="button"
+										class="avatar btn btn-ghost btn-sm flex flex-nowrap justify-start"
+									>
+										<div class="w-6 rounded-full">
+											<picture>
+												<Image src={userIcon} alt="User Icon" />
+											</picture>
+										</div>
+										<span id="userName">
+											{sessionData.fname}&nbsp;{sessionData.lname}
+										</span>
+									</div>
+									<ul
+										tabindex="0"
+										class="menu dropdown-content menu-sm z-[999] mt-3 w-48 rounded-box bg-gray-700 p-2 shadow"
+									>
+										<button id="logout" class="btn btn-ghost btn-sm justify-start">
+											<picture>
+												<Image src={logOutIcon} class="h-6 w-6" alt="Log Out Icon" />
+											</picture>
+											Cerrar Sesión
+										</button>
+									</ul>
+								</Fragment>
+							)
+						}
+					</div>
+				</div>
+			</ul>
+		</div>
+	</div>
+</Fragment>
+
+<script is:inline define:vars={{ pathname, sessionData }}>
+	const logoutButton = document.querySelector("#logout")
+
+	const publicRoutes = ["/", "/iniciar-sesion", "generate"]
+	// Si no hay datos en la sesión y la página actual no es un ruta pública
+	// se redirige al usuario a la página de inicio
+	if (!sessionData && !publicRoutes.includes(location.pathname)) {
+		location.href = "/"
+	}
+
+	if (sessionData.username) {
+		logoutButton.addEventListener("click", async () => {
+			const logoutEndpoint = "/api/users/logout.json"
+
+			const response = await fetch(logoutEndpoint, {
+				method: "POST",
+			})
+
+			if (response.status === 400) return
+
+			const data = await response.json()
+			const { message } = data
+
+			if (message === "success") {
+				// Eliminar la sesión de la cookie
+				document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+				location.href = "/"
+			}
+		})
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	const menuItems = document.querySelector("#menu-items")
+
+	const currentSize = window.innerWidth
+	handleResize(currentSize)
+
+	window.addEventListener("resize", () => {
+		const currentSize = window.innerWidth
+		handleResize(currentSize)
+	})
+
+	function handleResize(currentSize) {
+		// sm breakpoint --> 640px
+		if (currentSize <= 640) {
+			menuItems.classList.add("dropdown", "dropdown-end")
+		} else {
+			menuItems.classList.remove("dropdown", "dropdown-end")
+		}
+	}
+</script>

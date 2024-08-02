@@ -1,0 +1,206 @@
+<div class="mb-16 mt-7">
+	<h1 class="mb-7 text-center text-2xl font-bold uppercase">Ventas</h1>
+	<div class="flex w-full justify-center">
+		<div
+			class="w-[700px] rounded-lg border border-slate-500 bg-white p-5 text-black shadow-lg lg:w-[1100px]"
+		>
+			<div class="flex gap-5">
+				<!-- select years -->
+				<label class="form-control mb-5">
+					<div class="label">
+						<span class="label-text text-black">Filtrar por año</span>
+					</div>
+					<div class="join">
+						<select
+							id="years-select"
+							class="join-item select-bordered border border-gray-500 bg-white"
+						>
+							<option disabled value="" selected>Selecciona un año</option>
+						</select>
+						<button
+							id="btn-select-year"
+							class="btn btn-ghost join-item border border-slate-500 px-5 hover:border-slate-500"
+							>x</button
+						>
+					</div>
+				</label>
+				<!-- select products -->
+				<label class="form-control mb-5">
+					<div class="label">
+						<span class="label-text text-black">Filtrar por producto</span>
+					</div>
+					<div class="join">
+						<select
+							id="products-select"
+							class="join-item select-bordered border border-gray-500 bg-white"
+						>
+							<option disabled value="" selected>Selecciona un producto para filtar</option>
+						</select>
+						<button
+							id="btn-select-product"
+							class="btn btn-ghost join-item border border-slate-500 px-5 hover:border-slate-500"
+							>x</button
+						>
+					</div>
+				</label>
+			</div>
+			<table id="salesTable" class="stripe bg-white"></table>
+		</div>
+	</div>
+</div>
+
+<script is:inline>
+	const yearsEndpoint = "/api/times/years.json"
+	const yearsSelect = document.getElementById("years-select")
+	const btnSelectYear = document.getElementById("btn-select-year")
+
+	const productsEndpoint = "/api/products/names.json"
+	const productsSelect = document.getElementById("products-select")
+	const btnSelectProduct = document.getElementById("btn-select-product")
+
+	async function fetchYears() {
+		const response = await fetch(yearsEndpoint)
+		const data = await response.json()
+		const { anios } = data
+
+		anios.forEach((year) => {
+			const option = document.createElement("option")
+			option.value = year.año
+			option.textContent = year.año
+			yearsSelect.appendChild(option)
+		})
+	}
+
+	async function fetchProducts() {
+		const response = await fetch(productsEndpoint)
+		const data = await response.json()
+		const { productos } = data
+
+		productos.forEach((product) => {
+			const option = document.createElement("option")
+			option.value = product.nombre_producto
+			option.textContent = product.nombre_producto
+			productsSelect.appendChild(option)
+		})
+	}
+
+	const salesEndpoint = "/api/sales/get.json"
+	let cachedTotalRecords = null
+	let cachedTotalRecordsFiltered = null
+	const cachedSearchValue = null
+
+	async function main() {
+		await fetchYears()
+		await fetchProducts()
+
+		const salesTable = new DataTable("#salesTable", {
+			serverSide: true,
+			language: {
+				url: "/i18n/datatables_es-ES.json",
+			},
+			ajax: {
+				url: salesEndpoint,
+				type: "GET",
+				data(table) {
+					// console.log("----- table -----")
+					// console.log(table)
+
+					let orderColumn = "id_ventas"
+					let orderDirection = "asc"
+
+					try {
+						orderColumn = table.columns[table.order[0].column].name
+						orderDirection = table.order[0].dir
+					} catch (error) {
+						orderColumn = "id_ventas"
+						orderDirection = "asc"
+					}
+
+					return {
+						draw: table.draw || 1,
+						initialRow: table.start || 0,
+						year: yearsSelect.value || "",
+						rowsNumber: table.length || 10,
+						product: productsSelect.value || "",
+						searchValue: table.search.value || "",
+						sortColumn: orderColumn || "id_ventas",
+						sortDirection: orderDirection || "asc",
+						cachedTotalRecords: cachedTotalRecords || 0,
+						cachedTotalRecordsFiltered: cachedTotalRecordsFiltered || 0,
+					}
+				},
+				dataSrc(sales) {
+					cachedTotalRecords = sales.recordsTotal
+					cachedTotalRecordsFiltered = sales.recordsFiltered
+					return sales.data
+				},
+			},
+			columns: [
+				{ data: "id_ventas", name: "id_ventas", title: "ID" },
+				{ data: "anio", name: "anio", title: "Año" },
+				{ data: "trimestre", name: "trimestre", title: "Trimestre" },
+				{ data: "mes", name: "mes", title: "Mes" },
+				{ data: "dia", name: "dia", title: "Día" },
+				{ data: "nombre_cliente", name: "nombre_cliente", title: "Nombre Cliente" },
+				{ data: "tipo_cliente", name: "tipo_cliente", title: "Tipo Cliente" },
+				{ data: "producto", name: "producto", title: "Producto" },
+				{
+					data: "sum_cantidad_producto",
+					name: "sum_cantidad_producto",
+					title: "Cantidad Producto",
+				},
+				{ data: "sum_iva_cuota", name: "sum_iva_cuota", title: "IVA Cuota" },
+				{
+					data: "sum_iva_vigente_cuota",
+					name: "sum_iva_vigente_cuota",
+					title: "IVA Vigente Cuota",
+				},
+				{ data: "sum_precio_producto", name: "sum_precio_producto", title: "Precio Producto" },
+				{ data: "sum_total_cuota", name: "sum_total_cuota", title: "Total Cuota" },
+			],
+			columnDefs: [
+				{ width: "30px", targets: 0 },
+				{ width: "55px", targets: 1 },
+				{ width: "80px", targets: 2 },
+				{ width: "55px", targets: 3 },
+				{ width: "35px", targets: 4 },
+				{ width: "300px", targets: 5 },
+				{ width: "122px", targets: 6 },
+				{ width: "185px", targets: 7 },
+				{ width: "90px", targets: 8 },
+				{ width: "97px", targets: 9 },
+				{ width: "112px", targets: 10 },
+				{ width: "97px", targets: 11 },
+				{ width: "75px", targets: 12 },
+			],
+			processing: true,
+			serverSide: true,
+			pagination: true,
+			search: {
+				smart: true,
+			},
+			scrollX: true,
+			autoWidth: true,
+		})
+
+		yearsSelect.addEventListener("change", () => {
+			salesTable.ajax.reload()
+		})
+
+		btnSelectYear.addEventListener("click", () => {
+			yearsSelect.value = ""
+			salesTable.ajax.reload()
+		})
+
+		productsSelect.addEventListener("change", () => {
+			salesTable.ajax.reload()
+		})
+
+		btnSelectProduct.addEventListener("click", () => {
+			productsSelect.value = ""
+			salesTable.ajax.reload()
+		})
+	}
+
+	main()
+</script>
